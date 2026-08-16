@@ -1,0 +1,31 @@
+import React from 'react';
+
+const pages = {
+  '/impressum': { title: 'Impressum', intro: 'Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)', sections: [
+    ['Diensteanbieterin', <>Dorota Wendler<br/>Franz-Xaver-Honold-Str. 18<br/>76149 Karlsruhe<br/>Deutschland</>],
+    ['Kontakt', <><a href="mailto:dorota@dorotawendler.de">dorota@dorotawendler.de</a></>],
+    ['Verantwortlich für den Inhalt', <>Dorota Wendler<br/>Anschrift wie oben</>],
+    ['Verbraucherstreitbeilegung', <>Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</>],
+    ['Haftung für Inhalte und Links', <>Wir erstellen die Inhalte dieser Website mit großer Sorgfalt. Eine Gewähr für Vollständigkeit, Richtigkeit und Aktualität können wir dennoch nicht übernehmen. Für Inhalte externer Seiten sind ausschließlich deren Betreiber verantwortlich.</>],
+    ['Urheberrecht', <>Texte, Gestaltung und eigene Bildinhalte auf dieser Website sind urheberrechtlich geschützt. Eine Nutzung außerhalb der gesetzlichen Grenzen ist nur mit vorheriger Zustimmung erlaubt.</>]
+  ]},
+  '/datenschutz': { title: 'Datenschutzerklärung', intro: 'Informationen nach Art. 13 und 14 Datenschutz-Grundverordnung (DSGVO)', sections: [
+    ['Verantwortliche', <>Dorota Wendler<br/>Franz-Xaver-Honold-Str. 18<br/>76149 Karlsruhe<br/><a href="mailto:dorota@dorotawendler.de">dorota@dorotawendler.de</a></>],
+    ['Hosting und Server-Protokolle', <>Beim Aufruf dieser Website verarbeitet unser Hostinganbieter technisch erforderliche Daten. Dazu können IP-Adresse, Zeitpunkt, aufgerufene Datei, Datenmenge, Referrer, Browser, Betriebssystem und Zugriffsstatus gehören. Die Verarbeitung dient dem sicheren und stabilen Betrieb auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Protokolldaten werden grundsätzlich spätestens nach 30 Tagen gelöscht, sofern keine sicherheitsbedingte Aufbewahrung erforderlich ist.</>],
+    ['Kontaktaufnahme', <>Wenn Sie uns per E-Mail oder Telefon kontaktieren, verarbeiten wir Ihre Angaben, um Ihre Anfrage zu beantworten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO bei vorvertraglichen oder vertraglichen Anfragen, ansonsten Art. 6 Abs. 1 lit. f DSGVO. Wir löschen die Daten, sobald die Anfrage erledigt ist und keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</>],
+    ['Cookies, Analyse und externe Schriften', <>Diese Website setzt keine Analyse- oder Marketingdienste ein und speichert keine nicht erforderlichen Cookies. Schriften und Bilder werden lokal bereitgestellt. Beim Laden der Seite wird deshalb keine Verbindung zu Google Fonts oder Bilddatenbanken aufgebaut.</>],
+    ['Empfänger und Drittlandübermittlung', <>Technische Daten können durch unseren beauftragten Hostinganbieter verarbeitet werden. Eine Übermittlung in ein Drittland ist von uns nicht vorgesehen. Sollte sich die eingesetzte Infrastruktur ändern, wird diese Erklärung aktualisiert.</>],
+    ['Ihre Rechte', <>Sie haben im gesetzlichen Rahmen das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Einwilligungen können Sie mit Wirkung für die Zukunft widerrufen. Außerdem können Sie sich bei einer Datenschutzaufsichtsbehörde beschweren, insbesondere beim Landesbeauftragten für den Datenschutz und die Informationsfreiheit Baden-Württemberg.</>],
+    ['Stand', <>16. August 2026</>]
+  ]},
+  '/nutzungsbedingungen': { title: 'Nutzungsbedingungen', intro: 'Hinweise für die Nutzung dieser Website', sections: [
+    ['Geltungsbereich', <>Diese Hinweise gelten für die öffentlich zugänglichen Inhalte auf dorotawendler.de. Sie sind keine Allgemeinen Geschäftsbedingungen für individuelle Design- oder Webprojekte. Für Aufträge gelten die jeweils konkret vereinbarten Bedingungen.</>],
+    ['Inhalte dieser Website', <>Die Inhalte informieren über Leistungen und Referenzen. Sie stellen kein verbindliches Angebot dar. Ein Vertrag kommt erst durch eine individuelle Vereinbarung in Textform zustande.</>],
+    ['Nutzungsrechte', <>Inhalte, Gestaltung, Texte und Abbildungen dürfen für den persönlichen Informationszweck angesehen werden. Jede darüber hinausgehende Vervielfältigung, Bearbeitung oder Veröffentlichung benötigt eine vorherige Zustimmung, soweit keine gesetzliche Erlaubnis besteht.</>],
+    ['Verfügbarkeit', <>Wir bemühen uns um eine zuverlässige Bereitstellung der Website. Eine jederzeitige, fehlerfreie oder unterbrechungsfreie Verfügbarkeit kann technisch nicht garantiert werden.</>],
+    ['Anwendbares Recht', <>Es gilt das Recht der Bundesrepublik Deutschland. Zwingende Verbraucherschutzvorschriften am gewöhnlichen Aufenthaltsort einer Verbraucherin oder eines Verbrauchers bleiben unberührt.</>]
+  ]}
+};
+
+export function getLegalPage(path) { return pages[path]; }
+export function LegalPage({ page }) { return <main className="legal-page"><nav className="nav shell"><a className="wordmark" href="/">Dorota Wendler<span>.</span></a><a className="legal-back" href="/">Zurück zur Website</a></nav><article className="legal-shell"><p className="eyebrow">Rechtliches</p><h1>{page.title}</h1><p className="legal-intro">{page.intro}</p>{page.sections.map(([title, content]) => <section key={title}><h2>{title}</h2><p>{content}</p></section>)}</article><footer className="legal-footer shell"><span>© {new Date().getFullYear()} Dorota Wendler</span><div><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/nutzungsbedingungen">Nutzungsbedingungen</a></div></footer></main>; }

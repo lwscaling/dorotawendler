@@ -1,0 +1,1 @@
+{"scripts":{"dev":"vite --host 127.0.0.1","build":"vite build"},"dependencies":{"@gsap/react":"latest","gsap":"latest","lucide-react":"latest","react":"latest","react-dom":"latest"},"devDependencies":{"@vitejs/plugin-react":"latest","vite":"latest"},"license":"UNLICENSED","private":true,"type":"module"}
