@@ -118,11 +118,17 @@ function InquiryModal({ open, onClose }) {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ project, timing, name, email, note, website, turnstileToken, startedAt }),
       });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Die Anfrage konnte nicht versendet werden.');
+      const responseText = await response.text();
+      const isJson = response.headers.get('content-type')?.toLowerCase().includes('application/json');
+      let result = null;
+      if (isJson && responseText) {
+        try { result = JSON.parse(responseText); } catch { result = null; }
+      }
+      if (!response.ok || result?.success !== true) throw new Error(result?.error || 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.');
       setSent(true);
     } catch (submissionError) {
-      setError(submissionError.message || 'Die Anfrage konnte nicht versendet werden.');
+      const safeMessage = /^(Die Anfrage|Bitte |Die Sicherheitsprüfung)/.test(submissionError?.message || '') ? submissionError.message : 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.';
+      setError(safeMessage);
       setTurnstileToken('');
       if (widgetRef.current !== undefined && window.turnstile) window.turnstile.reset(widgetRef.current);
     } finally { setSubmitting(false); }
@@ -186,7 +192,7 @@ function App() {
       </div>
       <button className="button primary nav-cta" onClick={openInquiry}>Projekt besprechen <ArrowDownRight size={17}/></button>
       <button className="menu-btn" onClick={() => setMenuOpen((current) => !current)} aria-label={menuOpen ? 'Menü schließen' : 'Menü öffnen'} aria-expanded={menuOpen} aria-controls="mobile-navigation">{menuOpen ? <X size={20}/> : <Menu size={20}/>}</button>
-      {menuOpen && <div className="mobile-menu" id="mobile-navigation"><a onClick={() => setMenuOpen(false)} href="#expertise">Expertise</a><a onClick={() => setMenuOpen(false)} href="#work">Arbeiten</a><a onClick={() => setMenuOpen(false)} href="#contact">Kontakt</a><button className="button primary" onClick={openInquiry}>Projekt besprechen <ArrowDownRight size={16}/></button></div>}
+      {menuOpen && <div className="mobile-menu" id="mobile-navigation"><a onClick={() => setMenuOpen(false)} href="#expertise">Expertise</a><a onClick={() => setMenuOpen(false)} href="#work">Arbeiten</a><a onClick={() => setMenuOpen(false)} href="#contact">Kontakt</a></div>}
     </nav>
 
     <header id="top" className="hero shell">
@@ -240,6 +246,7 @@ function App() {
       <div className="shell contact-inner reveal"><p className="eyebrow">Eine erste Idee reicht</p><h2>Was möchten Sie<br/><em>verändern?</em></h2><p className="contact-copy">Erzählen Sie mir kurz von Ihrem Projekt. Ich melde mich persönlich und sage Ihnen ehrlich, wie ich helfen kann.</p><div className="contact-row"><button className="button primary" onClick={openInquiry}>Projekt besprechen <ArrowDownRight/></button><div><a href="mailto:dorota@dorotawendler.de">dorota@dorotawendler.de</a></div></div></div>
       <footer className="shell"><a className="wordmark inverse" href="/">Dorota Wendler</a><p>Personal Branding & Webdesign aus Karlsruhe</p><div><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/nutzungsbedingungen">Nutzungsbedingungen</a></div></footer>
     </section>
+    {!inquiryOpen && <button className="mobile-sticky-cta" onClick={openInquiry}>Projekt besprechen <ArrowDownRight size={15}/></button>}
     <InquiryModal open={inquiryOpen} onClose={() => setInquiryOpen(false)}/>
   </main>
 }
