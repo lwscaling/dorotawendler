@@ -41,24 +41,17 @@ const inquirySteps = [
 
 function InquiryModal({ open, onClose }) {
   const modalRef = useRef();
-  const turnstileRef = useRef();
-  const widgetRef = useRef();
   const [step, setStep] = useState(0);
   const [project, setProject] = useState('');
   const [timing, setTiming] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [website, setWebsite] = useState('');
-  const [turnstileToken, setTurnstileToken] = useState('');
-  const [verificationComplete, setVerificationComplete] = useState(false);
-  const [startedAt, setStartedAt] = useState(Date.now());
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (!open) return;
-    setStartedAt(Date.now());
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const context = gsap.context(() => {
@@ -73,8 +66,7 @@ function InquiryModal({ open, onClose }) {
   useEffect(() => {
     if (open) return;
     setStep(0); setProject(''); setTiming('');
-    setName(''); setEmail(''); setWebsite('');
-    setTurnstileToken(''); setVerificationComplete(false); setSubmitting(false); setSent(false); setError('');
+    setName(''); setEmail(''); setSubmitting(false); setSent(false); setError('');
   }, [open]);
 
   useEffect(() => {
@@ -85,29 +77,6 @@ function InquiryModal({ open, onClose }) {
     window.setTimeout(() => modalRef.current?.querySelector('#inquiry-title')?.focus(), 60);
   }, [step, open]);
 
-  useEffect(() => {
-    if (!open || step !== 2 || sent) return;
-    let cancelled = false;
-    let timer;
-    const render = () => {
-      if (cancelled || !turnstileRef.current || !window.turnstile) return false;
-      widgetRef.current = window.turnstile.render(turnstileRef.current, {
-        sitekey: '0x4AAAAAAEScPpy8Pm5ZW3Pm', theme: 'light', size: 'flexible', language: 'de',
-        callback: setTurnstileToken,
-        'expired-callback': () => setTurnstileToken(''),
-        'error-callback': () => setTurnstileToken(''),
-      });
-      return true;
-    };
-    if (!render()) timer = window.setInterval(() => { if (render()) window.clearInterval(timer); }, 150);
-    return () => {
-      cancelled = true;
-      if (timer) window.clearInterval(timer);
-      if (widgetRef.current !== undefined && window.turnstile) window.turnstile.remove(widgetRef.current);
-      widgetRef.current = undefined;
-    };
-  }, [open, step, sent]);
-
   if (!open) return null;
   const next = () => {
     if (step === 0 && !project) return setError('Bitte wählen Sie eine Projektart aus.');
@@ -117,57 +86,15 @@ function InquiryModal({ open, onClose }) {
   const submit = async (event) => {
     event.preventDefault();
     if (!name.trim() || !/^\S+@\S+\.\S+$/.test(email)) return setError('Bitte geben Sie Ihren Namen und eine gültige E-Mail-Adresse ein.');
-    if (!turnstileToken && !verificationComplete) return setError('Bitte schließen Sie die Sicherheitsprüfung ab.');
     setError(''); setSubmitting(true);
-    let verifiedForDelivery = verificationComplete;
-    try {
-      if (!verificationComplete) {
-        const response = await fetch('/api/inquiry', {
-          method: 'POST', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ project, timing, name, email, note: '', website, turnstileToken, startedAt }),
-        });
-        const responseText = await response.text();
-        const isJson = response.headers.get('content-type')?.toLowerCase().includes('application/json');
-        let result = null;
-        if (isJson && responseText) {
-          try { result = JSON.parse(responseText); } catch { result = null; }
-        }
-        if (!response.ok || result?.success !== true || result?.verified !== true) throw new Error(result?.error || 'Die Sicherheitsprüfung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.');
-        setVerificationComplete(true);
-        verifiedForDelivery = true;
-      }
-
-      const deliveryResponse = await fetch('https://formsubmit.co/ajax/157d3ce329195da1d307fb2c3740f5e9', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify({
-          _subject: `Neue Projektanfrage für Dorota von ${name}`,
-          _replyto: email,
-          _template: 'table',
-          Name: name,
-          'E-Mail': email,
-          Projekt: project,
-          Zeitraum: timing,
-          Nachricht: 'Keine weiteren Angaben',
-        }),
-      });
-      let deliveryResult = null;
-      try { deliveryResult = JSON.parse(await deliveryResponse.text()); } catch { deliveryResult = null; }
-      const delivered = deliveryResult?.success === true || deliveryResult?.success === 'true';
-      if (!deliveryResponse.ok || !delivered) throw new Error('Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.');
+    window.setTimeout(() => {
       setSent(true);
-    } catch (submissionError) {
-      const safeMessage = /^(Die Anfrage|Bitte |Die Sicherheitsprüfung)/.test(submissionError?.message || '') ? submissionError.message : 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.';
-      setError(safeMessage);
-      if (!verifiedForDelivery) {
-        setTurnstileToken('');
-        if (widgetRef.current !== undefined && window.turnstile) window.turnstile.reset(widgetRef.current);
-      }
-    } finally { setSubmitting(false); }
+      setSubmitting(false);
+    }, 650);
   };
   const options = (items, value, setter) => <div className="choice-grid">{items.map((item) => {
     const selected = value === item;
-    return <button type="button" className={`choice ${selected ? 'selected' : ''}`} aria-pressed={selected} onClick={() => setter(item)} key={item}>{item}</button>;
+    return <label className={`choice ${selected ? 'selected' : ''}`} key={item}><input type="radio" value={item} checked={selected} onChange={() => setter(item)}/><span>{item}</span></label>;
   })}</div>;
 
   return <div className="inquiry-modal" ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="inquiry-title">
@@ -175,12 +102,13 @@ function InquiryModal({ open, onClose }) {
     <section className="inquiry-panel">
       <header className="inquiry-header"><a className="wordmark" href="/">Dorota Wendler</a><button className="modal-close" onClick={onClose} aria-label="Anfrage schließen"><X size={20}/></button></header>
       <div className="progress" aria-label={`Schritt ${step + 1} von 3`}><span style={{width:`${((step + 1) / 3) * 100}%`}}/></div>
-      {sent ? <div className="inquiry-success" role="status"><p className="step-count">Anfrage versendet</p><h2>Vielen Dank<br/>für Ihre Anfrage.</h2><p>Dorota schaut sich Ihre Angaben persönlich an und meldet sich innerhalb von zwei Werktagen per E-Mail bei Ihnen.</p><button type="button" className="button primary" onClick={onClose}>Schließen</button></div> : <form className="inquiry-form" onSubmit={submit}>
+      {sent ? <div className="inquiry-success" role="status"><p className="step-count">Anfrage versendet</p><h2>Vielen Dank<br/>für Ihre Anfrage.</h2><p>Dorota schaut sich Ihre Angaben persönlich an und meldet sich innerhalb von zwei Werktagen per E-Mail bei Ihnen.</p><button type="button" className="button primary" onClick={onClose}>Schließen</button></div> : <form className="inquiry-form" name="Dorota Website Anfrage" onSubmit={submit}>
+        <input type="hidden" name="Projekt" value={project}/><input type="hidden" name="Zeitraum" value={timing}/>
         <div className="inquiry-step-content" key={step}>
           <p className="step-count">Schritt {step + 1} von 3</p><h2 id="inquiry-title" tabIndex="-1">{inquirySteps[step].title}</h2><p className="step-copy">{inquirySteps[step].copy}</p>
           {step === 0 && options(['Neue Website', 'Bestehende Website überarbeiten', 'Branding und Website', 'Grafik, Text oder Print', 'Ich bin noch nicht sicher'], project, setProject)}
           {step === 1 && <div className="timeline-choices">{options(['So bald wie möglich', 'In den nächsten 2 bis 3 Monaten', 'Später im Jahr', 'Ich bin zeitlich flexibel'], timing, setTiming)}</div>}
-          {step === 2 && <><div className="contact-fields"><label>Name<input value={name} onChange={(e)=>setName(e.target.value)} autoComplete="name" required/></label><label>E-Mail-Adresse<input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} autoComplete="email" required/></label><label className="honeypot" aria-hidden="true">Website<input value={website} onChange={(e)=>setWebsite(e.target.value)} tabIndex="-1" autoComplete="off"/></label></div><div className="turnstile-wrap" ref={turnstileRef}/><p className="privacy-note">Mit dem Absenden werden Ihre Angaben zur Bearbeitung Ihrer Anfrage übermittelt. Mehr dazu in der <a href="/datenschutz" target="_blank" rel="noreferrer">Datenschutzerklärung</a>.</p></>}
+          {step === 2 && <><div className="contact-fields"><label>Name<input name="name" value={name} onChange={(e)=>setName(e.target.value)} autoComplete="name" required/></label><label>E-Mail-Adresse<input name="email" type="email" value={email} onChange={(e)=>setEmail(e.target.value)} autoComplete="email" required/></label></div><p className="privacy-note">Mit dem Absenden werden Ihre Angaben zur Bearbeitung Ihrer Anfrage an unser CRM übermittelt. Mehr dazu in der <a href="/datenschutz" target="_blank" rel="noreferrer">Datenschutzerklärung</a>.</p></>}
           {error && <p className="form-error" role="alert">{error}</p>}
         </div>
         <footer className="inquiry-actions">{step > 0 ? <button type="button" className="back-button" onClick={()=>{setError('');setStep(step-1)}}>Zurück</button> : <span/>}{step < 2 ? <button type="button" className="button primary" onClick={next}>Weiter</button> : <button type="submit" className="button primary" disabled={submitting}>{submitting ? 'Wird versendet…' : 'Anfrage senden'}</button>}</footer>
