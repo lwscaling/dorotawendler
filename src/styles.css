@@ -64,3 +64,6 @@
 
 @media(max-width:560px){.legal-shell h1{font-size:clamp(2.75rem,12vw,3.4rem);overflow-wrap:anywhere}.contact-inner{padding-block:5.5rem 5rem}.contact-copy{margin-top:2rem}.contact-row{margin-top:2.25rem}}
 @media(hover:none){.service-card::before{display:none}.service-card:hover{background:rgba(247,243,236,.98);transform:none}.service-card:hover h3,.service-card:hover p{transform:none}.button.primary:hover,.button.secondary:hover{transform:none}}
+
+@media(max-width:900px){.nav{grid-template-columns:1fr auto}.menu-btn{display:grid!important;width:42px;height:42px;padding:0;place-items:center;border:1px solid rgba(72,63,53,.14);border-radius:12px;background:#eee8de;color:var(--ink);cursor:pointer;transition:background .2s,transform .2s}.menu-btn:active{transform:scale(.96)}.mobile-menu{display:grid!important;position:absolute;top:calc(100% + .65rem);left:0;right:0;padding:.65rem;background:rgba(248,245,239,.98);border:1px solid rgba(72,63,53,.12);border-radius:16px;box-shadow:0 20px 55px rgba(64,55,45,.16);backdrop-filter:blur(16px);gap:.2rem;z-index:30}.mobile-menu>a{padding:1rem .9rem;border-radius:10px;font-size:.95rem}.mobile-menu>a:hover{background:#eee8de}.mobile-menu .button{width:100%;margin-top:.45rem;min-height:50px}}
+@media(min-width:901px){.menu-btn,.mobile-menu{display:none!important}}

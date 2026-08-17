@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowDownRight, X } from 'lucide-react';
+import { ArrowDownRight, Menu, X } from 'lucide-react';
 import './styles.css';
 import { getLegalPage, LegalPage } from './legal.jsx';
 
@@ -153,8 +153,9 @@ function InquiryModal({ open, onClose }) {
 
 function App() {
   const root = useRef();
+  const [menuOpen, setMenuOpen] = useState(false);
   const [inquiryOpen, setInquiryOpen] = useState(false);
-  const openInquiry = () => setInquiryOpen(true);
+  const openInquiry = () => { setMenuOpen(false); setInquiryOpen(true); };
 
   useGSAP(() => {
     gsap.from('.hero-word', { yPercent: 105, stagger: .09, duration: 1.15, ease: 'power4.out' });
@@ -184,6 +185,8 @@ function App() {
         <a href="#expertise">Expertise</a><a href="#work">Arbeiten</a><a href="#contact">Kontakt</a>
       </div>
       <button className="button primary nav-cta" onClick={openInquiry}>Projekt besprechen <ArrowDownRight size={17}/></button>
+      <button className="menu-btn" onClick={() => setMenuOpen((current) => !current)} aria-label={menuOpen ? 'Menü schließen' : 'Menü öffnen'} aria-expanded={menuOpen} aria-controls="mobile-navigation">{menuOpen ? <X size={20}/> : <Menu size={20}/>}</button>
+      {menuOpen && <div className="mobile-menu" id="mobile-navigation"><a onClick={() => setMenuOpen(false)} href="#expertise">Expertise</a><a onClick={() => setMenuOpen(false)} href="#work">Arbeiten</a><a onClick={() => setMenuOpen(false)} href="#contact">Kontakt</a><button className="button primary" onClick={openInquiry}>Projekt besprechen <ArrowDownRight size={16}/></button></div>}
     </nav>
 
     <header id="top" className="hero shell">
