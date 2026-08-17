@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowDownRight, Menu, X } from 'lucide-react';
+import { ArrowDownRight, X } from 'lucide-react';
 import './styles.css';
 import { getLegalPage, LegalPage } from './legal.jsx';
 
@@ -153,7 +153,6 @@ function InquiryModal({ open, onClose }) {
 
 function App() {
   const root = useRef();
-  const [menuOpen, setMenuOpen] = useState(false);
   const [inquiryOpen, setInquiryOpen] = useState(false);
   const openInquiry = () => setInquiryOpen(true);
 
@@ -172,7 +171,9 @@ function App() {
       { opacity: .1 },
       { opacity: 1, stagger: .08, ease: 'none', scrollTrigger: { trigger: '.statement', start: 'top 72%', end: 'bottom 58%', scrub: true } }
     );
-    ScrollTrigger.create({ trigger: '.work-layout', start: 'top 12%', end: 'bottom 78%', pin: '.work-intro', pinSpacing: false });
+    const desktop = gsap.matchMedia();
+    desktop.add('(min-width: 901px)', () => ScrollTrigger.create({ trigger: '.work-layout', start: 'top 12%', end: 'bottom 78%', pin: '.work-intro', pinSpacing: false }));
+    return () => desktop.revert();
   }, { scope: root });
 
   return <main ref={root} className="page" id="main-content">
@@ -183,22 +184,20 @@ function App() {
         <a href="#expertise">Expertise</a><a href="#work">Arbeiten</a><a href="#contact">Kontakt</a>
       </div>
       <button className="button primary nav-cta" onClick={openInquiry}>Projekt besprechen <ArrowDownRight size={17}/></button>
-      <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Menü schließen' : 'Menü öffnen'} aria-expanded={menuOpen}>{menuOpen ? <X/> : <Menu/>}</button>
-      {menuOpen && <div className="mobile-menu"><a onClick={() => setMenuOpen(false)} href="#expertise">Expertise</a><a onClick={() => setMenuOpen(false)} href="#work">Arbeiten</a><a onClick={() => setMenuOpen(false)} href="#contact">Kontakt</a></div>}
     </nav>
 
     <header id="top" className="hero shell">
       <div className="hero-copy">
         <p className="eyebrow">Personal Branding & Webdesign · Karlsruhe</p>
-        <h1 aria-label="Ihre Marke. Nur persönlicher.">
-          <span className="line"><span className="hero-word">Ihre Marke.</span></span>
+        <h1 aria-label="Ihr Geschäft. Nur persönlicher.">
+          <span className="line"><span className="hero-word">Ihr Geschäft.</span></span>
           <span className="line serif"><span className="hero-word">Nur persönlicher.</span></span>
         </h1>
         <p className="hero-lead">Ich entwickle digitale Auftritte die nach Ihnen aussehen. Klar gestaltet, eigenständig und mit viel Liebe zum Detail.</p>
         <div className="hero-actions"><button className="button primary" onClick={openInquiry}>Projekt besprechen <ArrowDownRight size={18}/></button><a className="button secondary" href="#work">Projekte ansehen</a></div>
       </div>
       <div className="hero-visual">
-        <img className="hero-studio" src="/assets/hero-studio-v2.png" alt="Offener Laptop in einem ruhigen Designstudio"/>
+        <img className="hero-studio" src="/assets/hero-studio-v2.png" alt="Offener Laptop in einem ruhigen Designstudio" fetchPriority="high" decoding="async"/>
         <p className="studio-note">Ideen werden sichtbar.<br/>Marken werden spürbar.</p>
       </div>
     </header>
@@ -222,7 +221,7 @@ function App() {
         <div className="work-intro"><p className="eyebrow">Ein Blick auf meine Arbeiten</p><h2>Arbeit, die<br/><em>Charakter zeigt.</em></h2><p>Jedes Projekt ist anders, weil auch jeder Mensch und jedes Unternehmen etwas Eigenes mitbringt.</p></div>
         <div className="project-list">
           {projects.map((project) => <article className="project-card" key={project[1]}>
-            <div className="project-image"><img src={project[2]} alt={`${project[0]}, ${project[1]}`}/></div>
+            <div className="project-image"><img src={project[2]} alt={`${project[0]}, ${project[1]}`} loading="lazy" decoding="async"/></div>
             <div className="project-meta"><div><p>{project[0]}</p><h3>{project[1]}</h3></div></div>
           </article>)}
         </div>
@@ -230,7 +229,7 @@ function App() {
     </section>
 
     <section className="about shell reveal">
-      <div className="about-image"><img src="/assets/dorota-about-v2.png" alt="Dorota Wendler, Webdesignerin aus Karlsruhe"/></div>
+      <div className="about-image"><img src="/assets/dorota-about-v2.png" alt="Dorota Wendler, Webdesignerin aus Karlsruhe" loading="lazy" decoding="async"/></div>
       <div className="about-copy"><p className="eyebrow">Lernen wir uns kennen</p><h2>Hallo, ich bin Dorota.</h2><p>Ich bin freiberufliche Webdesignerin aus Karlsruhe. Ich höre gerne genau hin und entwickle Lösungen, die wirklich zu den Menschen dahinter passen.</p><p>Bei mir sprechen Sie immer direkt mit der Person, die Ihr Projekt gestaltet. Ich begleite Sie von den ersten Gedanken über Text und Design bis zur fertigen Website.</p><button className="button primary" onClick={openInquiry}>Projekt besprechen <ArrowDownRight size={17}/></button></div>
     </section>
 

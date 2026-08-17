@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const pages = {
   '/impressum': { title: 'Impressum', intro: 'Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)', sections: [
@@ -29,4 +29,4 @@ const pages = {
 };
 
 export function getLegalPage(path) { return pages[path]; }
-export function LegalPage({ page }) { return <main className="legal-page"><nav className="nav shell"><a className="wordmark" href="/">Dorota Wendler</a><a className="legal-back" href="/">Zurück zur Website</a></nav><article className="legal-shell"><p className="eyebrow">Rechtliches</p><h1>{page.title}</h1><p className="legal-intro">{page.intro}</p>{page.sections.map(([title, content]) => <section key={title}><h2>{title}</h2><p>{content}</p></section>)}</article><footer className="legal-footer shell"><span>© {new Date().getFullYear()} Dorota Wendler</span><div><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/nutzungsbedingungen">Nutzungsbedingungen</a></div></footer></main>; }
+export function LegalPage({ page }) { useEffect(() => { const title = `${page.title} | Dorota Wendler`; const url = `https://dorotawendler.de${window.location.pathname}`; document.title = title; document.querySelector('meta[name="description"]')?.setAttribute('content', page.intro); document.querySelector('link[rel="canonical"]')?.setAttribute('href', url); document.querySelector('meta[property="og:title"]')?.setAttribute('content', title); document.querySelector('meta[property="og:url"]')?.setAttribute('content', url); }, [page]); return <main className="legal-page"><nav className="nav shell"><a className="wordmark" href="/">Dorota Wendler</a><a className="legal-back" href="/">Zurück zur Website</a></nav><article className="legal-shell"><p className="eyebrow">Rechtliches</p><h1>{page.title}</h1><p className="legal-intro">{page.intro}</p>{page.sections.map(([title, content]) => <section key={title}><h2>{title}</h2><p>{content}</p></section>)}</article><footer className="legal-footer shell"><span>© {new Date().getFullYear()} Dorota Wendler</span><div><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/nutzungsbedingungen">Nutzungsbedingungen</a></div></footer></main>; }
