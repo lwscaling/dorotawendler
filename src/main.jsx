@@ -130,30 +130,7 @@ function InquiryModal({ open, onClose }) {
       if (isJson && responseText) {
         try { result = JSON.parse(responseText); } catch { result = null; }
       }
-      if (!response.ok || result?.success !== true || result?.verified !== true) throw new Error(result?.error || 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.');
-
-      const deliveryResponse = await fetch('https://formsubmit.co/ajax/157d3ce329195da1d307fb2c3740f5e9', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify({
-          _subject: `Neue Projektanfrage für Dorota von ${name}`,
-          _cc: 'dorota@dorotawendler.de',
-          _replyto: email,
-          _template: 'table',
-          Name: name,
-          'E-Mail': email,
-          Projekt: project,
-          Zeitraum: timing,
-          Nachricht: note || 'Keine weiteren Angaben',
-        }),
-      });
-      const deliveryText = await deliveryResponse.text();
-      let deliveryResult = null;
-      if (deliveryText) {
-        try { deliveryResult = JSON.parse(deliveryText); } catch { deliveryResult = null; }
-      }
-      const delivered = deliveryResponse.ok && (deliveryResult?.success === true || deliveryResult?.success === 'true');
-      if (!delivered) throw new Error('Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.');
+      if (!response.ok || result?.success !== true || result?.delivered !== true) throw new Error(result?.error || 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.');
       setSent(true);
     } catch (submissionError) {
       const safeMessage = /^(Die Anfrage|Bitte |Die Sicherheitsprüfung)/.test(submissionError?.message || '') ? submissionError.message : 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.';

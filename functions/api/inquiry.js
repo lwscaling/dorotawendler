@@ -40,8 +40,29 @@ export async function onRequestPost({ request, env }) {
   }
   if (!verified.success) return json({ error: 'Die Sicherheitsprüfung ist abgelaufen. Bitte versuchen Sie es erneut.' }, 400);
 
-  console.log({ event: 'inquiry_verified', project, timing });
-  return json({ success: true, verified: true });
+  if (!env.MAILER) return json({ success: false, error: 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.' }, 503);
+  let delivery;
+  try {
+    delivery = await env.MAILER.fetch('https://mailer.internal/send', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name, email, project, timing, note }),
+    });
+  } catch {
+    console.error({ event: 'inquiry_delivery_unreachable' });
+    return json({ success: false, error: 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.' }, 503);
+  }
+  const deliveryType = delivery.headers.get('content-type')?.toLowerCase() || '';
+  let deliveryResult = null;
+  if (deliveryType.includes('application/json')) {
+    try { deliveryResult = await delivery.json(); } catch { deliveryResult = null; }
+  }
+  if (!delivery.ok || deliveryResult?.success !== true) {
+    console.error({ event: 'inquiry_delivery_failed', status: delivery.status });
+    return json({ success: false, error: 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.' }, 503);
+  }
+  console.log({ event: 'inquiry_sent', project, timing });
+  return json({ success: true, delivered: true });
 }
 
 export function onRequest() { return json({ success: false, error: 'Methode nicht erlaubt.' }, 405); }
