@@ -135,7 +135,7 @@ function InquiryModal({ open, onClose }) {
   return <div className="inquiry-modal" ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="inquiry-title">
     <button className="inquiry-backdrop" aria-label="Anfrage schließen" onClick={onClose}/>
     <section className="inquiry-panel">
-      <header className="inquiry-header"><a className="wordmark" href="#top">Dorota Wendler<span>.</span></a><button className="modal-close" onClick={onClose} aria-label="Anfrage schließen"><X size={20}/></button></header>
+      <header className="inquiry-header"><a className="wordmark" href="/">Dorota Wendler</a><button className="modal-close" onClick={onClose} aria-label="Anfrage schließen"><X size={20}/></button></header>
       <div className="progress" aria-label={`Schritt ${step + 1} von 3`}><span style={{width:`${((step + 1) / 3) * 100}%`}}/></div>
       {sent ? <div className="inquiry-success" role="status"><p className="step-count">Anfrage versendet</p><h2>Vielen Dank<br/>für Ihre Anfrage.</h2><p>Dorota schaut sich Ihre Angaben persönlich an und meldet sich innerhalb von zwei Werktagen per E-Mail bei Ihnen.</p><button type="button" className="button primary" onClick={onClose}>Schließen</button></div> : <form className="inquiry-form" onSubmit={submit}>
         <div className="inquiry-step-content" key={step}>
@@ -178,7 +178,7 @@ function App() {
   return <main ref={root} className="page" id="main-content">
     <a className="skip-link" href="#main-content">Direkt zum Inhalt</a>
     <nav className="nav shell">
-      <a className="wordmark" href="#top" aria-label="Startseite">Dorota Wendler<span>.</span></a>
+      <a className="wordmark" href="/" aria-label="Startseite neu laden">Dorota Wendler</a>
       <div className="nav-links">
         <a href="#expertise">Expertise</a><a href="#work">Arbeiten</a><a href="#contact">Kontakt</a>
       </div>
@@ -236,7 +236,7 @@ function App() {
 
     <section id="contact" className="contact">
       <div className="shell contact-inner reveal"><p className="eyebrow">Eine erste Idee reicht</p><h2>Was möchten Sie<br/><em>verändern?</em></h2><p className="contact-copy">Erzählen Sie mir kurz von Ihrem Projekt. Ich melde mich persönlich und sage Ihnen ehrlich, wie ich helfen kann.</p><div className="contact-row"><button className="button primary" onClick={openInquiry}>Projekt besprechen <ArrowDownRight/></button><div><a href="mailto:dorota@dorotawendler.de">dorota@dorotawendler.de</a></div></div></div>
-      <footer className="shell"><a className="wordmark inverse" href="#top">Dorota Wendler<span>.</span></a><p>Personal Branding & Webdesign aus Karlsruhe</p><div><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/nutzungsbedingungen">Nutzungsbedingungen</a></div></footer>
+      <footer className="shell"><a className="wordmark inverse" href="/">Dorota Wendler</a><p>Personal Branding & Webdesign aus Karlsruhe</p><div><a href="/impressum">Impressum</a><a href="/datenschutz">Datenschutz</a><a href="/nutzungsbedingungen">Nutzungsbedingungen</a></div></footer>
     </section>
     <InquiryModal open={inquiryOpen} onClose={() => setInquiryOpen(false)}/>
   </main>
