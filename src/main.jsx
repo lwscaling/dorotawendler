@@ -48,7 +48,6 @@ function InquiryModal({ open, onClose }) {
   const [timing, setTiming] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [note, setNote] = useState('');
   const [website, setWebsite] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
   const [startedAt, setStartedAt] = useState(Date.now());
@@ -73,7 +72,7 @@ function InquiryModal({ open, onClose }) {
   useEffect(() => {
     if (open) return;
     setStep(0); setProject(''); setTiming('');
-    setName(''); setEmail(''); setNote(''); setWebsite('');
+    setName(''); setEmail(''); setWebsite('');
     setTurnstileToken(''); setSubmitting(false); setSent(false); setError('');
   }, [open]);
 
@@ -122,7 +121,7 @@ function InquiryModal({ open, onClose }) {
     try {
       const response = await fetch('/api/inquiry', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ project, timing, name, email, note, website, turnstileToken, startedAt }),
+        body: JSON.stringify({ project, timing, name, email, note: '', website, turnstileToken, startedAt }),
       });
       const responseText = await response.text();
       const isJson = response.headers.get('content-type')?.toLowerCase().includes('application/json');
@@ -154,7 +153,7 @@ function InquiryModal({ open, onClose }) {
           <p className="step-count">Schritt {step + 1} von 3</p><h2 id="inquiry-title" tabIndex="-1">{inquirySteps[step].title}</h2><p className="step-copy">{inquirySteps[step].copy}</p>
           {step === 0 && options(['Neue Website', 'Bestehende Website überarbeiten', 'Branding und Website', 'Grafik, Text oder Print', 'Ich bin noch nicht sicher'], project, setProject)}
           {step === 1 && <div className="timeline-choices">{options(['So bald wie möglich', 'In den nächsten 2 bis 3 Monaten', 'Später im Jahr', 'Ich bin zeitlich flexibel'], timing, setTiming)}</div>}
-          {step === 2 && <><div className="contact-fields"><label>Name<input value={name} onChange={(e)=>setName(e.target.value)} autoComplete="name" required/></label><label>E-Mail-Adresse<input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} autoComplete="email" required/></label><label className="full-field">Erzählen Sie mir kurz von Ihrem Projekt <span className="optional-label">(optional)</span><textarea value={note} onChange={(e)=>setNote(e.target.value)} rows="4" placeholder="Was möchten Sie verändern, neu aufbauen oder erreichen? Ein oder zwei Sätze reichen." maxLength="2000"/></label><label className="honeypot" aria-hidden="true">Website<input value={website} onChange={(e)=>setWebsite(e.target.value)} tabIndex="-1" autoComplete="off"/></label></div><div className="turnstile-wrap" ref={turnstileRef}/><p className="privacy-note">Mit dem Absenden werden Ihre Angaben zur Bearbeitung Ihrer Anfrage übermittelt. Mehr dazu in der <a href="/datenschutz" target="_blank" rel="noreferrer">Datenschutzerklärung</a>.</p></>}
+          {step === 2 && <><div className="contact-fields"><label>Name<input value={name} onChange={(e)=>setName(e.target.value)} autoComplete="name" required/></label><label>E-Mail-Adresse<input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} autoComplete="email" required/></label><label className="honeypot" aria-hidden="true">Website<input value={website} onChange={(e)=>setWebsite(e.target.value)} tabIndex="-1" autoComplete="off"/></label></div><div className="turnstile-wrap" ref={turnstileRef}/><p className="privacy-note">Mit dem Absenden werden Ihre Angaben zur Bearbeitung Ihrer Anfrage übermittelt. Mehr dazu in der <a href="/datenschutz" target="_blank" rel="noreferrer">Datenschutzerklärung</a>.</p></>}
           {error && <p className="form-error" role="alert">{error}</p>}
         </div>
         <footer className="inquiry-actions">{step > 0 ? <button type="button" className="back-button" onClick={()=>{setError('');setStep(step-1)}}>Zurück</button> : <span/>}{step < 2 ? <button type="button" className="button primary" onClick={next}>Weiter</button> : <button type="submit" className="button primary" disabled={submitting}>{submitting ? 'Wird versendet…' : 'Anfrage senden'}</button>}</footer>
