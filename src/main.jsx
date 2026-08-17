@@ -9,11 +9,17 @@ import { getLegalPage, LegalPage } from './legal.jsx';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-const projects = [
+const featuredProjects = [
+  { category: 'Praxiswebsite', name: 'Dr. Marlene zur Oeveste', image: '/assets/project-osteogyn.jpg', url: 'https://www.osteogyn.de/', domain: 'osteogyn.de' },
+  { category: 'Vereinswebsite', name: 'Förderverein des Generallandesarchivs Karlsruhe e.V.', image: '/assets/project-foerderverein-glak.jpg', url: 'https://foerderverein-glak.de/', domain: 'foerderverein-glak.de' },
+  { category: 'Vereinswebsite', name: 'Arbeitsgemeinschaft Landeskunde am Oberrhein e.V.', image: '/assets/project-ag-landeskunde.jpg', url: 'https://www.ag-landeskunde-oberrhein.de/', domain: 'ag-landeskunde-oberrhein.de' },
+];
+
+const additionalProjects = [
   ['Gynäkologische Praxis', 'Dr. med. Marion Rütten', '/assets/project-1.png'],
   ['Versicherungen & Finanzen', 'Thorsten Eichsteller', '/assets/project-2.png'],
   ['Werkstatt', 'Autoklinik Karlsruhe', '/assets/project-3.png'],
-  ['Webalbum', 'Photo Album', '/assets/project-4.png'],
+  ['Webalbum', 'Fotoalbum', '/assets/project-4.png'],
   ['Interaktive Präsentation', 'Kunsthalle Karlsruhe', '/assets/project-5.png'],
   ['Künstlerportfolio', 'Wolfgang Wendler', '/assets/project-6.png'],
 ];
@@ -124,7 +130,30 @@ function InquiryModal({ open, onClose }) {
       if (isJson && responseText) {
         try { result = JSON.parse(responseText); } catch { result = null; }
       }
-      if (!response.ok || result?.success !== true) throw new Error(result?.error || 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.');
+      if (!response.ok || result?.success !== true || result?.verified !== true) throw new Error(result?.error || 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.');
+
+      const deliveryResponse = await fetch('https://formsubmit.co/ajax/157d3ce329195da1d307fb2c3740f5e9', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({
+          _subject: `Neue Projektanfrage für Dorota von ${name}`,
+          _cc: 'dorota@dorotawendler.de',
+          _replyto: email,
+          _template: 'table',
+          Name: name,
+          'E-Mail': email,
+          Projekt: project,
+          Zeitraum: timing,
+          Nachricht: note || 'Keine weiteren Angaben',
+        }),
+      });
+      const deliveryText = await deliveryResponse.text();
+      let deliveryResult = null;
+      if (deliveryText) {
+        try { deliveryResult = JSON.parse(deliveryText); } catch { deliveryResult = null; }
+      }
+      const delivered = deliveryResponse.ok && (deliveryResult?.success === true || deliveryResult?.success === 'true');
+      if (!delivered) throw new Error('Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.');
       setSent(true);
     } catch (submissionError) {
       const safeMessage = /^(Die Anfrage|Bitte |Die Sicherheitsprüfung)/.test(submissionError?.message || '') ? submissionError.message : 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.';
@@ -227,12 +256,21 @@ function App() {
 
     <section id="work" className="work shell">
       <div className="work-layout">
-        <div className="work-intro"><p className="eyebrow">Ein Blick auf meine Arbeiten</p><h2>Arbeit, die<br/><em>Charakter zeigt.</em></h2><p>Jedes Projekt ist anders, weil auch jeder Mensch und jedes Unternehmen etwas Eigenes mitbringt.</p></div>
+        <div className="work-intro"><p className="eyebrow">Ausgewählte Arbeiten</p><h2>Websites für<br/><em>echte Aufgaben.</em></h2><p>Von der Praxis bis zum Verein: Diese Seiten wurden von mir entwickelt und werden bis heute betreut.</p></div>
         <div className="project-list">
-          {projects.map((project) => <article className="project-card" key={project[1]}>
-            <div className="project-image"><img src={project[2]} alt={`${project[0]}, ${project[1]}`} loading="lazy" decoding="async"/></div>
-            <div className="project-meta"><div><p>{project[0]}</p><h3>{project[1]}</h3></div></div>
-          </article>)}
+          {featuredProjects.map((project) => <a className="project-card featured-project" href={project.url} target="_blank" rel="noreferrer" key={project.name} aria-label={`${project.name} besuchen`}>
+            <div className="project-image"><img src={project.image} alt={`Website von ${project.name}`} loading="lazy" decoding="async"/></div>
+            <div className="project-meta"><div><p>{project.category}</p><h3>{project.name}</h3></div><span>{project.domain}</span></div>
+          </a>)}
+          <div className="project-archive">
+            <div className="project-archive-heading"><p className="eyebrow">Weitere Arbeiten</p><p>Eine Auswahl aus Branding, Webdesign und digitalen Präsentationen.</p></div>
+            <div className="project-archive-grid">
+              {additionalProjects.map((project) => <article className="project-archive-item" key={project[1]}>
+                <img src={project[2]} alt="" loading="lazy" decoding="async"/>
+                <div><p>{project[0]}</p><h3>{project[1]}</h3></div>
+              </article>)}
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -40,30 +40,8 @@ export async function onRequestPost({ request, env }) {
   }
   if (!verified.success) return json({ error: 'Die Sicherheitsprüfung ist abgelaufen. Bitte versuchen Sie es erneut.' }, 400);
 
-  let relay;
-  try {
-    relay = await fetch('https://formsubmit.co/ajax/157d3ce329195da1d307fb2c3740f5e9', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', accept: 'application/json', origin: 'https://dorotawendler.de', referer: 'https://dorotawendler.de/' },
-      body: JSON.stringify({
-        _subject: `Neue Projektanfrage für Dorota von ${name}`, _cc: 'dorota@dorotawendler.de', _replyto: email, _template: 'table',
-        Name: name, 'E-Mail': email, Projekt: project, Zeitraum: timing, Nachricht: note || 'Keine weiteren Angaben',
-      }),
-    });
-  } catch {
-    console.error({ event: 'inquiry_delivery_unreachable' });
-    return json({ error: 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.' }, 502);
-  }
-  const relayText = await relay.text();
-  let relayResult = null;
-  if (relayText) try { relayResult = JSON.parse(relayText); } catch { relayResult = null; }
-  const delivered = relay.ok && (relayResult?.success === true || relayResult?.success === 'true');
-  if (!delivered) {
-    console.error({ event: 'inquiry_delivery_failed', status: relay.status });
-    return json({ success: false, error: 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.' }, 502);
-  }
-  console.log({ event: 'inquiry_sent', project, timing });
-  return json({ success: true });
+  console.log({ event: 'inquiry_verified', project, timing });
+  return json({ success: true, verified: true });
 }
 
 export function onRequest() { return json({ success: false, error: 'Methode nicht erlaubt.' }, 405); }
