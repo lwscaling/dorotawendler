@@ -86,7 +86,7 @@ function InquiryModal({ open, onClose }) {
     const render = () => {
       if (cancelled || !turnstileRef.current || !window.turnstile) return false;
       widgetRef.current = window.turnstile.render(turnstileRef.current, {
-        sitekey: '0x4AAAAAAEScPpy8Pm5ZW3Pm', theme: 'light', size: 'flexible',
+        sitekey: '0x4AAAAAAEScPpy8Pm5ZW3Pm', theme: 'light', size: 'flexible', language: 'de',
         callback: setTurnstileToken,
         'expired-callback': () => setTurnstileToken(''),
         'error-callback': () => setTurnstileToken(''),
@@ -129,7 +129,7 @@ function InquiryModal({ open, onClose }) {
   };
   const options = (items, value, setter) => <div className="choice-grid">{items.map((item) => {
     const selected = value === item;
-    return <button type="button" className={`choice ${selected ? 'selected' : ''}`} aria-pressed={selected} onClick={() => setter(item)} key={item}>{item}<span>{selected ? 'Ausgewählt' : 'Wählen'}</span></button>;
+    return <button type="button" className={`choice ${selected ? 'selected' : ''}`} aria-pressed={selected} onClick={() => setter(item)} key={item}>{item}</button>;
   })}</div>;
 
   return <div className="inquiry-modal" ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="inquiry-title">
