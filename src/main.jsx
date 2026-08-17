@@ -46,6 +46,7 @@ function InquiryModal({ open, onClose }) {
   const [timing, setTiming] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [details, setDetails] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
@@ -66,7 +67,7 @@ function InquiryModal({ open, onClose }) {
   useEffect(() => {
     if (open) return;
     setStep(0); setProject(''); setTiming('');
-    setName(''); setEmail(''); setSubmitting(false); setSent(false); setError('');
+    setName(''); setEmail(''); setDetails(''); setSubmitting(false); setSent(false); setError('');
   }, [open]);
 
   useEffect(() => {
@@ -104,11 +105,11 @@ function InquiryModal({ open, onClose }) {
       <div className="progress" aria-label={`Schritt ${step + 1} von 3`}><span style={{width:`${((step + 1) / 3) * 100}%`}}/></div>
       {sent ? <div className="inquiry-success" role="status"><p className="step-count">Anfrage versendet</p><h2>Vielen Dank<br/>für Ihre Anfrage.</h2><p>Dorota schaut sich Ihre Angaben persönlich an und meldet sich innerhalb von zwei Werktagen per E-Mail bei Ihnen.</p><button type="button" className="button primary" onClick={onClose}>Schließen</button></div> : <form className="inquiry-form" name="Dorota Website Anfrage" onSubmit={submit}>
         <input type="hidden" name="Projekt" value={project}/><input type="hidden" name="Zeitraum" value={timing}/>
-        <div className="inquiry-step-content" key={step}>
+        <div className={`inquiry-step-content ${step === 2 ? 'contact-step' : ''}`} key={step}>
           <p className="step-count">Schritt {step + 1} von 3</p><h2 id="inquiry-title" tabIndex="-1">{inquirySteps[step].title}</h2><p className="step-copy">{inquirySteps[step].copy}</p>
           {step === 0 && options(['Neue Website', 'Bestehende Website überarbeiten', 'Branding und Website', 'Grafik, Text oder Print', 'Ich bin noch nicht sicher'], project, setProject)}
           {step === 1 && <div className="timeline-choices">{options(['So bald wie möglich', 'In den nächsten 2 bis 3 Monaten', 'Später im Jahr', 'Ich bin zeitlich flexibel'], timing, setTiming)}</div>}
-          {step === 2 && <><div className="contact-fields"><label>Name<input name="name" value={name} onChange={(e)=>setName(e.target.value)} autoComplete="name" required/></label><label>E-Mail-Adresse<input name="email" type="email" value={email} onChange={(e)=>setEmail(e.target.value)} autoComplete="email" required/></label></div><p className="privacy-note">Mit dem Absenden werden Ihre Angaben zur Bearbeitung Ihrer Anfrage an unser CRM übermittelt. Mehr dazu in der <a href="/datenschutz" target="_blank" rel="noreferrer">Datenschutzerklärung</a>.</p></>}
+          {step === 2 && <><div className="contact-fields"><label>Name<input name="name" value={name} onChange={(e)=>setName(e.target.value)} autoComplete="name" required/></label><label>E-Mail-Adresse<input name="email" type="email" value={email} onChange={(e)=>setEmail(e.target.value)} autoComplete="email" required/></label><label className="full-field">Ein paar Worte zum Projekt <span>(optional)</span><textarea name="Projektbeschreibung" value={details} onChange={(e)=>setDetails(e.target.value)} maxLength="1200" rows="3" placeholder="Was soll entstehen oder sich verändern?"/></label></div><p className="privacy-note">Mit dem Absenden werden Ihre Angaben zur Bearbeitung Ihrer Anfrage an unser CRM übermittelt. Mehr dazu in der <a href="/datenschutz" target="_blank" rel="noreferrer">Datenschutzerklärung</a>.</p></>}
           {error && <p className="form-error" role="alert">{error}</p>}
         </div>
         <footer className="inquiry-actions">{step > 0 ? <button type="button" className="back-button" onClick={()=>{setError('');setStep(step-1)}}>Zurück</button> : <span/>}{step < 2 ? <button type="button" className="button primary" onClick={next}>Weiter</button> : <button type="submit" className="button primary" disabled={submitting}>{submitting ? 'Wird versendet…' : 'Anfrage senden'}</button>}</footer>
