@@ -28,10 +28,9 @@ const services = [
 const statementWords = 'Eine gute Website klingt nach Ihnen und macht es anderen leicht, Vertrauen zu fassen.'.split(' ');
 
 const inquirySteps = [
-  { title: 'Worum geht es?', copy: 'Ein erster Eindruck reicht. Wir können die Details später gemeinsam sortieren.' },
-  { title: 'Was soll besser werden?', copy: 'Wählen Sie alles aus, was gerade wichtig ist.' },
-  { title: 'Wann möchten Sie starten?', copy: 'Eine grobe zeitliche Richtung genügt für den ersten Austausch.' },
-  { title: 'Wie erreiche ich Sie?', copy: 'Ihre Anfrage wird sicher übermittelt. Dorota meldet sich persönlich bei Ihnen.' }
+  { title: 'Wobei kann ich Sie unterstützen?', copy: 'Wählen Sie einfach aus, was Ihrem Projekt am nächsten kommt.' },
+  { title: 'Wann möchten Sie starten?', copy: 'Eine grobe Einschätzung reicht vollkommen.' },
+  { title: 'Wie kann ich Sie erreichen?', copy: 'Ein paar Angaben genügen. Dorota meldet sich persönlich per E-Mail.' }
 ];
 
 function InquiryModal({ open, onClose }) {
@@ -40,7 +39,6 @@ function InquiryModal({ open, onClose }) {
   const widgetRef = useRef();
   const [step, setStep] = useState(0);
   const [project, setProject] = useState('');
-  const [goals, setGoals] = useState([]);
   const [timing, setTiming] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -68,7 +66,7 @@ function InquiryModal({ open, onClose }) {
 
   useEffect(() => {
     if (open) return;
-    setStep(0); setProject(''); setGoals([]); setTiming('');
+    setStep(0); setProject(''); setTiming('');
     setName(''); setEmail(''); setNote(''); setWebsite('');
     setTurnstileToken(''); setSubmitting(false); setSent(false); setError('');
   }, [open]);
@@ -82,7 +80,7 @@ function InquiryModal({ open, onClose }) {
   }, [step, open]);
 
   useEffect(() => {
-    if (!open || step !== 3 || sent) return;
+    if (!open || step !== 2 || sent) return;
     let cancelled = false;
     let timer;
     const render = () => {
@@ -105,12 +103,10 @@ function InquiryModal({ open, onClose }) {
   }, [open, step, sent]);
 
   if (!open) return null;
-  const toggleGoal = (goal) => setGoals((current) => current.includes(goal) ? current.filter((item) => item !== goal) : [...current, goal]);
   const next = () => {
     if (step === 0 && !project) return setError('Bitte wählen Sie eine Projektart aus.');
-    if (step === 1 && goals.length === 0) return setError('Wählen Sie mindestens einen Punkt aus.');
-    if (step === 2 && !timing) return setError('Bitte wählen Sie einen ungefähren Zeitraum aus.');
-    setError(''); setStep((current) => Math.min(current + 1, 3));
+    if (step === 1 && !timing) return setError('Bitte wählen Sie einen ungefähren Zeitraum aus.');
+    setError(''); setStep((current) => Math.min(current + 1, 2));
   };
   const submit = async (event) => {
     event.preventDefault();
@@ -120,7 +116,7 @@ function InquiryModal({ open, onClose }) {
     try {
       const response = await fetch('/api/inquiry', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ project, goals, timing, name, email, note, website, turnstileToken, startedAt }),
+        body: JSON.stringify({ project, timing, name, email, note, website, turnstileToken, startedAt }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Die Anfrage konnte nicht versendet werden.');
@@ -131,26 +127,25 @@ function InquiryModal({ open, onClose }) {
       if (widgetRef.current !== undefined && window.turnstile) window.turnstile.reset(widgetRef.current);
     } finally { setSubmitting(false); }
   };
-  const options = (items, value, setter, multiple = false) => <div className="choice-grid">{items.map((item) => {
-    const selected = multiple ? value.includes(item) : value === item;
-    return <button type="button" className={`choice ${selected ? 'selected' : ''}`} aria-pressed={selected} onClick={() => multiple ? toggleGoal(item) : setter(item)} key={item}>{item}<span>{selected ? 'Ausgewählt' : 'Wählen'}</span></button>;
+  const options = (items, value, setter) => <div className="choice-grid">{items.map((item) => {
+    const selected = value === item;
+    return <button type="button" className={`choice ${selected ? 'selected' : ''}`} aria-pressed={selected} onClick={() => setter(item)} key={item}>{item}<span>{selected ? 'Ausgewählt' : 'Wählen'}</span></button>;
   })}</div>;
 
   return <div className="inquiry-modal" ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="inquiry-title">
     <button className="inquiry-backdrop" aria-label="Anfrage schließen" onClick={onClose}/>
     <section className="inquiry-panel">
       <header className="inquiry-header"><a className="wordmark" href="#top">Dorota Wendler<span>.</span></a><button className="modal-close" onClick={onClose} aria-label="Anfrage schließen"><X size={20}/></button></header>
-      <div className="progress" aria-label={`Schritt ${step + 1} von 4`}><span style={{width:`${((step + 1) / 4) * 100}%`}}/></div>
-      {sent ? <div className="inquiry-success" role="status"><p className="step-count">Anfrage versendet</p><h2>Vielen Dank,<br/>ich melde mich.</h2><p>Ihre Projektdetails sind sicher angekommen. Dorota antwortet persönlich an <strong>{email}</strong>.</p><button type="button" className="button primary" onClick={onClose}>Schließen</button></div> : <form className="inquiry-form" onSubmit={submit}>
+      <div className="progress" aria-label={`Schritt ${step + 1} von 3`}><span style={{width:`${((step + 1) / 3) * 100}%`}}/></div>
+      {sent ? <div className="inquiry-success" role="status"><p className="step-count">Anfrage versendet</p><h2>Vielen Dank<br/>für Ihre Anfrage.</h2><p>Dorota schaut sich Ihre Angaben persönlich an und meldet sich innerhalb von zwei Werktagen per E-Mail bei Ihnen.</p><button type="button" className="button primary" onClick={onClose}>Schließen</button></div> : <form className="inquiry-form" onSubmit={submit}>
         <div className="inquiry-step-content" key={step}>
-          <p className="step-count">Schritt {step + 1} von 4</p><h2 id="inquiry-title" tabIndex="-1">{inquirySteps[step].title}</h2><p className="step-copy">{inquirySteps[step].copy}</p>
-          {step === 0 && options(['Neue Website', 'Bestehende Website überarbeiten', 'Persönliche Marke schärfen', 'Grafik, Text oder Print'], project, setProject)}
-          {step === 1 && options(['Klarer auftreten', 'Mehr passende Anfragen', 'Inhalte besser strukturieren', 'Website selbst pflegen können'], goals, setGoals, true)}
-          {step === 2 && <div className="timeline-choices">{options(['So bald wie möglich', 'In den nächsten 2 bis 3 Monaten', 'Später, ich plane gerade'], timing, setTiming)}</div>}
-          {step === 3 && <><div className="contact-fields"><label>Name<input value={name} onChange={(e)=>setName(e.target.value)} autoComplete="name" required/></label><label>E-Mail<input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} autoComplete="email" required/></label><label className="full-field">Was sollte Dorota noch wissen?<textarea value={note} onChange={(e)=>setNote(e.target.value)} rows="4" placeholder="Ein paar Sätze genügen." maxLength="2000"/></label><label className="honeypot" aria-hidden="true">Website<input value={website} onChange={(e)=>setWebsite(e.target.value)} tabIndex="-1" autoComplete="off"/></label></div><div className="turnstile-wrap" ref={turnstileRef}/><p className="privacy-note">Mit dem Absenden werden Ihre Angaben zur Bearbeitung Ihrer Anfrage übermittelt. Mehr dazu in der <a href="/datenschutz" target="_blank" rel="noreferrer">Datenschutzerklärung</a>.</p></>}
+          <p className="step-count">Schritt {step + 1} von 3</p><h2 id="inquiry-title" tabIndex="-1">{inquirySteps[step].title}</h2><p className="step-copy">{inquirySteps[step].copy}</p>
+          {step === 0 && options(['Neue Website', 'Bestehende Website überarbeiten', 'Branding und Website', 'Grafik, Text oder Print', 'Ich bin noch nicht sicher'], project, setProject)}
+          {step === 1 && <div className="timeline-choices">{options(['So bald wie möglich', 'In den nächsten 2 bis 3 Monaten', 'Später im Jahr', 'Ich bin zeitlich flexibel'], timing, setTiming)}</div>}
+          {step === 2 && <><div className="contact-fields"><label>Name<input value={name} onChange={(e)=>setName(e.target.value)} autoComplete="name" required/></label><label>E-Mail-Adresse<input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} autoComplete="email" required/></label><label className="full-field">Erzählen Sie mir kurz von Ihrem Projekt <span className="optional-label">(optional)</span><textarea value={note} onChange={(e)=>setNote(e.target.value)} rows="4" placeholder="Was möchten Sie verändern, neu aufbauen oder erreichen? Ein oder zwei Sätze reichen." maxLength="2000"/></label><label className="honeypot" aria-hidden="true">Website<input value={website} onChange={(e)=>setWebsite(e.target.value)} tabIndex="-1" autoComplete="off"/></label></div><div className="turnstile-wrap" ref={turnstileRef}/><p className="privacy-note">Mit dem Absenden werden Ihre Angaben zur Bearbeitung Ihrer Anfrage übermittelt. Mehr dazu in der <a href="/datenschutz" target="_blank" rel="noreferrer">Datenschutzerklärung</a>.</p></>}
           {error && <p className="form-error" role="alert">{error}</p>}
         </div>
-        <footer className="inquiry-actions">{step > 0 ? <button type="button" className="back-button" onClick={()=>{setError('');setStep(step-1)}}>Zurück</button> : <span/>}{step < 3 ? <button type="button" className="button primary" onClick={next}>Weiter</button> : <button type="submit" className="button primary" disabled={submitting}>{submitting ? 'Wird versendet…' : 'Anfrage senden'}</button>}</footer>
+        <footer className="inquiry-actions">{step > 0 ? <button type="button" className="back-button" onClick={()=>{setError('');setStep(step-1)}}>Zurück</button> : <span/>}{step < 2 ? <button type="button" className="button primary" onClick={next}>Weiter</button> : <button type="submit" className="button primary" disabled={submitting}>{submitting ? 'Wird versendet…' : 'Anfrage senden'}</button>}</footer>
       </form>}
     </section>
   </div>;

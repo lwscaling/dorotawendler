@@ -1,8 +1,7 @@
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8' };
 const ALLOWED_ORIGINS = new Set(['https://dorotawendler.de', 'https://www.dorotawendler.de', 'https://dorotawendler.pages.dev']);
-const PROJECTS = new Set(['Neue Website', 'Bestehende Website überarbeiten', 'Persönliche Marke schärfen', 'Grafik, Text oder Print']);
-const GOALS = new Set(['Klarer auftreten', 'Mehr passende Anfragen', 'Inhalte besser strukturieren', 'Website selbst pflegen können']);
-const TIMINGS = new Set(['So bald wie möglich', 'In den nächsten 2 bis 3 Monaten', 'Später, ich plane gerade']);
+const PROJECTS = new Set(['Neue Website', 'Bestehende Website überarbeiten', 'Branding und Website', 'Grafik, Text oder Print', 'Ich bin noch nicht sicher']);
+const TIMINGS = new Set(['So bald wie möglich', 'In den nächsten 2 bis 3 Monaten', 'Später im Jahr', 'Ich bin zeitlich flexibel']);
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
 const clean = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : '';
 
@@ -19,9 +18,8 @@ export async function onRequestPost({ request, env }) {
   const project = clean(input.project, 100);
   const timing = clean(input.timing, 100);
   const note = clean(input.note, 2000);
-  const goals = Array.isArray(input.goals) ? input.goals.map((goal) => clean(goal, 100)).filter((goal) => GOALS.has(goal)).slice(0, 4) : [];
   const startedAt = Number(input.startedAt || 0);
-  if (!name || !/^\S+@\S+\.\S+$/.test(email) || !PROJECTS.has(project) || !TIMINGS.has(timing) || !goals.length) return json({ error: 'Bitte prüfen Sie Ihre Angaben.' }, 400);
+  if (!name || !/^\S+@\S+\.\S+$/.test(email) || !PROJECTS.has(project) || !TIMINGS.has(timing)) return json({ error: 'Bitte prüfen Sie Ihre Angaben.' }, 400);
   if (!startedAt || Date.now() - startedAt < 2500 || Date.now() - startedAt > 7_200_000) return json({ error: 'Bitte öffnen Sie das Formular erneut und versuchen Sie es noch einmal.' }, 400);
   if (!input.turnstileToken || !env.TURNSTILE_SECRET) return json({ error: 'Die Sicherheitsprüfung fehlt.' }, 400);
 
@@ -39,7 +37,7 @@ export async function onRequestPost({ request, env }) {
       headers: { 'content-type': 'application/json', accept: 'application/json', origin: 'https://dorotawendler.de', referer: 'https://dorotawendler.de/' },
       body: JSON.stringify({
         _subject: `Neue Projektanfrage von ${name}`, _cc: 'info@lwscaling.com', _replyto: email, _template: 'table',
-        Name: name, 'E-Mail': email, Projekt: project, Ziele: goals.join(', '), Zeitraum: timing, Nachricht: note || 'Keine weiteren Angaben',
+        Name: name, 'E-Mail': email, Projekt: project, Zeitraum: timing, Nachricht: note || 'Keine weiteren Angaben',
       }),
     });
   } catch {

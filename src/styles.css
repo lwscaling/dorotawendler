@@ -31,6 +31,8 @@
 @media(prefers-reduced-transparency:reduce){.inquiry-backdrop{backdrop-filter:none;background:rgba(52,49,45,.72)}}
 
 .inquiry-step-content h2:focus{outline:none}
+.optional-label{font-weight:400;color:#777168}
+.choice-grid>.choice:last-child:nth-child(odd){grid-column:1/-1}
 
 .hero-actions .text-link{min-height:54px;padding:0 1.35rem;border:1px solid rgba(72,63,53,.13);border-radius:12px;background:rgba(233,226,216,.58);display:inline-flex;align-items:center;justify-content:center;gap:.7rem;text-decoration:none;transition:background .2s,transform .2s,border-color .2s}.hero-actions .text-link:hover{opacity:1;background:#e8e0d4;border-color:rgba(72,63,53,.2);transform:translateY(-1px)}.hero-actions .text-link:active{transform:translateY(1px)}
 
