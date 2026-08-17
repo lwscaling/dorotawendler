@@ -50,6 +50,7 @@ function InquiryModal({ open, onClose }) {
   const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
+  const [verificationComplete, setVerificationComplete] = useState(false);
   const [startedAt, setStartedAt] = useState(Date.now());
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
@@ -73,7 +74,7 @@ function InquiryModal({ open, onClose }) {
     if (open) return;
     setStep(0); setProject(''); setTiming('');
     setName(''); setEmail(''); setWebsite('');
-    setTurnstileToken(''); setSubmitting(false); setSent(false); setError('');
+    setTurnstileToken(''); setVerificationComplete(false); setSubmitting(false); setSent(false); setError('');
   }, [open]);
 
   useEffect(() => {
@@ -116,26 +117,52 @@ function InquiryModal({ open, onClose }) {
   const submit = async (event) => {
     event.preventDefault();
     if (!name.trim() || !/^\S+@\S+\.\S+$/.test(email)) return setError('Bitte geben Sie Ihren Namen und eine gültige E-Mail-Adresse ein.');
-    if (!turnstileToken) return setError('Bitte schließen Sie die Sicherheitsprüfung ab.');
+    if (!turnstileToken && !verificationComplete) return setError('Bitte schließen Sie die Sicherheitsprüfung ab.');
     setError(''); setSubmitting(true);
+    let verifiedForDelivery = verificationComplete;
     try {
-      const response = await fetch('/api/inquiry', {
-        method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ project, timing, name, email, note: '', website, turnstileToken, startedAt }),
-      });
-      const responseText = await response.text();
-      const isJson = response.headers.get('content-type')?.toLowerCase().includes('application/json');
-      let result = null;
-      if (isJson && responseText) {
-        try { result = JSON.parse(responseText); } catch { result = null; }
+      if (!verificationComplete) {
+        const response = await fetch('/api/inquiry', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ project, timing, name, email, note: '', website, turnstileToken, startedAt }),
+        });
+        const responseText = await response.text();
+        const isJson = response.headers.get('content-type')?.toLowerCase().includes('application/json');
+        let result = null;
+        if (isJson && responseText) {
+          try { result = JSON.parse(responseText); } catch { result = null; }
+        }
+        if (!response.ok || result?.success !== true || result?.verified !== true) throw new Error(result?.error || 'Die Sicherheitsprüfung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.');
+        setVerificationComplete(true);
+        verifiedForDelivery = true;
       }
-      if (!response.ok || result?.success !== true || result?.delivered !== true) throw new Error(result?.error || 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.');
+
+      const deliveryResponse = await fetch('https://formsubmit.co/ajax/157d3ce329195da1d307fb2c3740f5e9', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify({
+          _subject: `Neue Projektanfrage für Dorota von ${name}`,
+          _replyto: email,
+          _template: 'table',
+          Name: name,
+          'E-Mail': email,
+          Projekt: project,
+          Zeitraum: timing,
+          Nachricht: 'Keine weiteren Angaben',
+        }),
+      });
+      let deliveryResult = null;
+      try { deliveryResult = JSON.parse(await deliveryResponse.text()); } catch { deliveryResult = null; }
+      const delivered = deliveryResult?.success === true || deliveryResult?.success === 'true';
+      if (!deliveryResponse.ok || !delivered) throw new Error('Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.');
       setSent(true);
     } catch (submissionError) {
       const safeMessage = /^(Die Anfrage|Bitte |Die Sicherheitsprüfung)/.test(submissionError?.message || '') ? submissionError.message : 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.';
       setError(safeMessage);
-      setTurnstileToken('');
-      if (widgetRef.current !== undefined && window.turnstile) window.turnstile.reset(widgetRef.current);
+      if (!verifiedForDelivery) {
+        setTurnstileToken('');
+        if (widgetRef.current !== undefined && window.turnstile) window.turnstile.reset(widgetRef.current);
+      }
     } finally { setSubmitting(false); }
   };
   const options = (items, value, setter) => <div className="choice-grid">{items.map((item) => {
