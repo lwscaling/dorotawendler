@@ -10,9 +10,9 @@ import { getLegalPage, LegalPage } from './legal.jsx';
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const featuredProjects = [
-  { category: 'Praxiswebsite', name: 'Dr. Marlene zur Oeveste', image: '/assets/project-osteogyn-clean.png', url: 'https://www.osteogyn.de/', domain: 'osteogyn.de' },
-  { category: 'Vereinswebsite', name: 'Förderverein des Generallandesarchivs Karlsruhe e.V.', image: '/assets/project-foerderverein-glak-clean.png', url: 'https://foerderverein-glak.de/', domain: 'foerderverein-glak.de' },
-  { category: 'Vereinswebsite', name: 'Arbeitsgemeinschaft Landeskunde am Oberrhein e.V.', image: '/assets/project-ag-landeskunde-clean.png', url: 'https://www.ag-landeskunde-oberrhein.de/', domain: 'ag-landeskunde-oberrhein.de' },
+  { category: 'Praxiswebsite', name: 'Dr. Marlene zur Oeveste', image: '/assets/project-osteogyn.jpg', url: 'https://www.osteogyn.de/', domain: 'osteogyn.de', theme: 'practice' },
+  { category: 'Vereinswebsite', name: 'Förderverein des Generallandesarchivs Karlsruhe e.V.', image: '/assets/project-foerderverein-glak.jpg', url: 'https://foerderverein-glak.de/', domain: 'foerderverein-glak.de', theme: 'archive-green' },
+  { category: 'Vereinswebsite', name: 'Arbeitsgemeinschaft Landeskunde am Oberrhein e.V.', image: '/assets/project-ag-landeskunde.jpg', url: 'https://www.ag-landeskunde-oberrhein.de/', domain: 'ag-landeskunde-oberrhein.de', theme: 'history' },
 ];
 
 const additionalProjects = [
@@ -189,7 +189,7 @@ function App() {
       <div className="work-layout">
         <div className="work-intro"><p className="eyebrow">Ausgewählte Arbeiten</p><h2>Websites für<br/><em>echte Aufgaben.</em></h2><p>Von der Praxis bis zum Verein: Diese Seiten wurden von mir entwickelt und werden bis heute betreut.</p></div>
         <div className="project-list">
-          {featuredProjects.map((project, index) => <a className="project-card featured-project" href={project.url} target="_blank" rel="noreferrer" key={project.name} aria-label={`${project.name} besuchen`}>
+          {featuredProjects.map((project, index) => <a className={`project-card featured-project project-${project.theme}`} href={project.url} target="_blank" rel="noreferrer" key={project.name} aria-label={`${project.name} besuchen`}>
             <div className="project-image"><span className="project-number">0{index + 1}</span><div className="project-browser"><div className="project-browser-bar"><i/><i/><i/><small>{project.domain}</small></div><div className="project-browser-viewport"><img src={project.image} alt={`Website von ${project.name}`} loading="lazy" decoding="async"/></div></div></div>
             <div className="project-meta"><div><p>{project.category}</p><h3>{project.name}</h3></div><span>{project.domain}</span></div>
           </a>)}
