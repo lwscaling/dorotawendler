@@ -32,13 +32,20 @@ export async function onRequestPost({ request, env }) {
   const verified = await verification.json();
   if (!verified.success) return json({ error: 'Die Sicherheitsprüfung ist abgelaufen. Bitte versuchen Sie es erneut.' }, 400);
 
-  const relay = await fetch('https://formsubmit.co/ajax/dorota@dorotawendler.de', {
-    method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json' },
-    body: JSON.stringify({
-      _subject: `Neue Projektanfrage von ${name}`, _cc: 'info@lwscaling.com', _replyto: email, _template: 'table',
-      Name: name, 'E-Mail': email, Projekt: project, Ziele: goals.join(', '), Zeitraum: timing, Nachricht: note || 'Keine weiteren Angaben',
-    }),
-  });
+  let relay;
+  try {
+    relay = await fetch('https://formsubmit.co/ajax/dorota@dorotawendler.de', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', accept: 'application/json', origin: 'https://dorotawendler.de', referer: 'https://dorotawendler.de/' },
+      body: JSON.stringify({
+        _subject: `Neue Projektanfrage von ${name}`, _cc: 'info@lwscaling.com', _replyto: email, _template: 'table',
+        Name: name, 'E-Mail': email, Projekt: project, Ziele: goals.join(', '), Zeitraum: timing, Nachricht: note || 'Keine weiteren Angaben',
+      }),
+    });
+  } catch {
+    console.error({ event: 'inquiry_delivery_unreachable' });
+    return json({ error: 'Die Anfrage konnte gerade nicht versendet werden. Bitte versuchen Sie es später erneut.' }, 502);
+  }
   const relayResult = await relay.json().catch(() => ({}));
   if (!relay.ok || relayResult.success === 'false' || relayResult.success === false) {
     console.error({ event: 'inquiry_delivery_failed', status: relay.status });
