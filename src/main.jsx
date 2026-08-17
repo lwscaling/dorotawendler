@@ -31,11 +31,13 @@ const inquirySteps = [
   { title: 'Worum geht es?', copy: 'Ein erster Eindruck reicht. Wir können die Details später gemeinsam sortieren.' },
   { title: 'Was soll besser werden?', copy: 'Wählen Sie alles aus, was gerade wichtig ist.' },
   { title: 'Wann möchten Sie starten?', copy: 'Eine grobe zeitliche Richtung genügt für den ersten Austausch.' },
-  { title: 'Wie erreiche ich Sie?', copy: 'Ihre Angaben werden nur in die vorbereitete E-Mail übernommen.' }
+  { title: 'Wie erreiche ich Sie?', copy: 'Ihre Anfrage wird sicher übermittelt. Dorota meldet sich persönlich bei Ihnen.' }
 ];
 
 function InquiryModal({ open, onClose }) {
   const modalRef = useRef();
+  const turnstileRef = useRef();
+  const widgetRef = useRef();
   const [step, setStep] = useState(0);
   const [project, setProject] = useState('');
   const [goals, setGoals] = useState([]);
@@ -43,10 +45,16 @@ function InquiryModal({ open, onClose }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [note, setNote] = useState('');
+  const [website, setWebsite] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [startedAt, setStartedAt] = useState(Date.now());
+  const [submitting, setSubmitting] = useState(false);
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (!open) return;
+    setStartedAt(Date.now());
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const context = gsap.context(() => {
@@ -59,12 +67,42 @@ function InquiryModal({ open, onClose }) {
   }, [open, onClose]);
 
   useEffect(() => {
+    if (open) return;
+    setStep(0); setProject(''); setGoals([]); setTiming('');
+    setName(''); setEmail(''); setNote(''); setWebsite('');
+    setTurnstileToken(''); setSubmitting(false); setSent(false); setError('');
+  }, [open]);
+
+  useEffect(() => {
     if (!open) return;
     const panel = modalRef.current?.querySelector('.inquiry-panel');
     panel?.scrollTo({ top: 0, behavior: 'smooth' });
     gsap.fromTo('.inquiry-step-content', { x: 18, opacity: 0 }, { x: 0, opacity: 1, duration: .35, ease: 'power2.out' });
     window.setTimeout(() => modalRef.current?.querySelector('#inquiry-title')?.focus(), 60);
   }, [step, open]);
+
+  useEffect(() => {
+    if (!open || step !== 3 || sent) return;
+    let cancelled = false;
+    let timer;
+    const render = () => {
+      if (cancelled || !turnstileRef.current || !window.turnstile) return false;
+      widgetRef.current = window.turnstile.render(turnstileRef.current, {
+        sitekey: '0x4AAAAAAEScPpy8Pm5ZW3Pm', theme: 'light', size: 'flexible',
+        callback: setTurnstileToken,
+        'expired-callback': () => setTurnstileToken(''),
+        'error-callback': () => setTurnstileToken(''),
+      });
+      return true;
+    };
+    if (!render()) timer = window.setInterval(() => { if (render()) window.clearInterval(timer); }, 150);
+    return () => {
+      cancelled = true;
+      if (timer) window.clearInterval(timer);
+      if (widgetRef.current !== undefined && window.turnstile) window.turnstile.remove(widgetRef.current);
+      widgetRef.current = undefined;
+    };
+  }, [open, step, sent]);
 
   if (!open) return null;
   const toggleGoal = (goal) => setGoals((current) => current.includes(goal) ? current.filter((item) => item !== goal) : [...current, goal]);
@@ -74,12 +112,24 @@ function InquiryModal({ open, onClose }) {
     if (step === 2 && !timing) return setError('Bitte wählen Sie einen ungefähren Zeitraum aus.');
     setError(''); setStep((current) => Math.min(current + 1, 3));
   };
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     if (!name.trim() || !/^\S+@\S+\.\S+$/.test(email)) return setError('Bitte geben Sie Ihren Namen und eine gültige E-Mail-Adresse ein.');
-    const subject = `Projektanfrage von ${name}`;
-    const body = [`Hallo Dorota,`, '', `ich interessiere mich für: ${project}`, `Wichtig ist mir: ${goals.join(', ')}`, `Gewünschter Zeitraum: ${timing}`, '', `Noch wichtig: ${note || 'Keine weiteren Angaben'}`, '', `Meine E-Mail: ${email}`, '', `Viele Grüße`, name].join('\n');
-    window.location.href = `mailto:dorota@dorotawendler.de?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    if (!turnstileToken) return setError('Bitte schließen Sie die Sicherheitsprüfung ab.');
+    setError(''); setSubmitting(true);
+    try {
+      const response = await fetch('/api/inquiry', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ project, goals, timing, name, email, note, website, turnstileToken, startedAt }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Die Anfrage konnte nicht versendet werden.');
+      setSent(true);
+    } catch (submissionError) {
+      setError(submissionError.message || 'Die Anfrage konnte nicht versendet werden.');
+      setTurnstileToken('');
+      if (widgetRef.current !== undefined && window.turnstile) window.turnstile.reset(widgetRef.current);
+    } finally { setSubmitting(false); }
   };
   const options = (items, value, setter, multiple = false) => <div className="choice-grid">{items.map((item) => {
     const selected = multiple ? value.includes(item) : value === item;
@@ -91,17 +141,17 @@ function InquiryModal({ open, onClose }) {
     <section className="inquiry-panel">
       <header className="inquiry-header"><a className="wordmark" href="#top">Dorota Wendler<span>.</span></a><button className="modal-close" onClick={onClose} aria-label="Anfrage schließen"><X size={20}/></button></header>
       <div className="progress" aria-label={`Schritt ${step + 1} von 4`}><span style={{width:`${((step + 1) / 4) * 100}%`}}/></div>
-      <form className="inquiry-form" onSubmit={submit}>
+      {sent ? <div className="inquiry-success" role="status"><p className="step-count">Anfrage versendet</p><h2>Vielen Dank,<br/>ich melde mich.</h2><p>Ihre Projektdetails sind sicher angekommen. Dorota antwortet persönlich an <strong>{email}</strong>.</p><button type="button" className="button primary" onClick={onClose}>Schließen</button></div> : <form className="inquiry-form" onSubmit={submit}>
         <div className="inquiry-step-content" key={step}>
           <p className="step-count">Schritt {step + 1} von 4</p><h2 id="inquiry-title" tabIndex="-1">{inquirySteps[step].title}</h2><p className="step-copy">{inquirySteps[step].copy}</p>
           {step === 0 && options(['Neue Website', 'Bestehende Website überarbeiten', 'Persönliche Marke schärfen', 'Grafik, Text oder Print'], project, setProject)}
           {step === 1 && options(['Klarer auftreten', 'Mehr passende Anfragen', 'Inhalte besser strukturieren', 'Website selbst pflegen können'], goals, setGoals, true)}
           {step === 2 && <div className="timeline-choices">{options(['So bald wie möglich', 'In den nächsten 2 bis 3 Monaten', 'Später, ich plane gerade'], timing, setTiming)}</div>}
-          {step === 3 && <div className="contact-fields"><label>Name<input value={name} onChange={(e)=>setName(e.target.value)} autoComplete="name"/></label><label>E-Mail<input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} autoComplete="email"/></label><label className="full-field">Was sollte Dorota noch wissen?<textarea value={note} onChange={(e)=>setNote(e.target.value)} rows="4" placeholder="Ein paar Sätze genügen."/></label></div>}
+          {step === 3 && <><div className="contact-fields"><label>Name<input value={name} onChange={(e)=>setName(e.target.value)} autoComplete="name" required/></label><label>E-Mail<input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} autoComplete="email" required/></label><label className="full-field">Was sollte Dorota noch wissen?<textarea value={note} onChange={(e)=>setNote(e.target.value)} rows="4" placeholder="Ein paar Sätze genügen." maxLength="2000"/></label><label className="honeypot" aria-hidden="true">Website<input value={website} onChange={(e)=>setWebsite(e.target.value)} tabIndex="-1" autoComplete="off"/></label></div><div className="turnstile-wrap" ref={turnstileRef}/><p className="privacy-note">Mit dem Absenden werden Ihre Angaben zur Bearbeitung Ihrer Anfrage übermittelt. Mehr dazu in der <a href="/datenschutz" target="_blank" rel="noreferrer">Datenschutzerklärung</a>.</p></>}
           {error && <p className="form-error" role="alert">{error}</p>}
         </div>
-        <footer className="inquiry-actions">{step > 0 ? <button type="button" className="back-button" onClick={()=>{setError('');setStep(step-1)}}>Zurück</button> : <span/>}{step < 3 ? <button type="button" className="button primary" onClick={next}>Weiter</button> : <button type="submit" className="button primary">E-Mail vorbereiten</button>}</footer>
-      </form>
+        <footer className="inquiry-actions">{step > 0 ? <button type="button" className="back-button" onClick={()=>{setError('');setStep(step-1)}}>Zurück</button> : <span/>}{step < 3 ? <button type="button" className="button primary" onClick={next}>Weiter</button> : <button type="submit" className="button primary" disabled={submitting}>{submitting ? 'Wird versendet…' : 'Anfrage senden'}</button>}</footer>
+      </form>}
     </section>
   </div>;
 }
