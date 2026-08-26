@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowDownRight, Menu, X } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Menu, X } from 'lucide-react';
 import './styles.css';
 import { getLegalPage, LegalPage } from './legal.jsx';
 
@@ -11,17 +11,17 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const featuredProjects = [
   { category: 'Praxiswebsite', name: 'Dr. Marlene zur Oeveste', image: '/assets/project-osteogyn.jpg', url: 'https://www.osteogyn.de/', domain: 'osteogyn.de', theme: 'practice' },
-  { category: 'Vereinswebsite', name: 'Förderverein des Generallandesarchivs Karlsruhe e.V.', image: '/assets/project-foerderverein-glak.jpg', url: 'https://foerderverein-glak.de/', domain: 'foerderverein-glak.de', theme: 'archive-green' },
+  { category: 'Vereinswebsite', name: 'Förderverein des Generallandesarchivs Karlsruhe e.V.', image: '/assets/project-foerderverein-glak.jpg', url: 'https://foerderverein-glak.de/', domain: 'foerderverein-glak.de', theme: 'archive-sage' },
   { category: 'Vereinswebsite', name: 'Arbeitsgemeinschaft Landeskunde am Oberrhein e.V.', image: '/assets/project-ag-landeskunde.jpg', url: 'https://www.ag-landeskunde-oberrhein.de/', domain: 'ag-landeskunde-oberrhein.de', theme: 'history' },
 ];
 
 const additionalProjects = [
-  ['Gynäkologische Praxis', 'Dr. med. Marion Rütten', '/assets/project-1.png'],
-  ['Versicherungen & Finanzen', 'Thorsten Eichsteller', '/assets/project-2.png'],
-  ['Werkstatt', 'Autoklinik Karlsruhe', '/assets/project-3.png'],
-  ['Webalbum', 'Fotoalbum', '/assets/project-4.png'],
-  ['Interaktive Präsentation', 'Kunsthalle Karlsruhe', '/assets/project-5.png'],
-  ['Künstlerportfolio', 'Wolfgang Wendler', '/assets/project-6.png'],
+  { category: 'Gynäkologische Praxis', name: 'Dr. med. Marion Rütten', image: '/assets/project-1.png', url: 'https://www.dr-ruetten.de/' },
+  { category: 'Versicherungen & Finanzen', name: 'Thorsten Eichsteller', image: '/assets/project-2.png', url: 'https://www.thorsten-eichsteller.de/' },
+  { category: 'Werkstatt', name: 'Autoklinik Karlsruhe', image: '/assets/project-3.png' },
+  { category: 'Webalbum', name: 'Fotoalbum', image: '/assets/project-4.png' },
+  { category: 'Interaktive Präsentation', name: 'Kunsthalle Karlsruhe', image: '/assets/project-5.png' },
+  { category: 'Künstlerportfolio', name: 'Wolfgang Wendler', image: '/assets/project-6.png', url: 'http://www.wolfgangwendler.de/' },
 ];
 
 const services = [
@@ -173,12 +173,11 @@ function App() {
     </header>
 
     <section className="statement shell">
-      <p className="eyebrow">Was Ihre Website leisten soll</p>
       <h2>{statementWords.map((word, i) => <span className="statement-word" key={`${word}-${i}`}>{word}{' '}</span>)}</h2>
     </section>
 
     <section id="expertise" className="services shell">
-      <div className="section-heading reveal"><p className="eyebrow">Was ich Ihnen abnehme</p><h2>Von der Idee<br/><em>bis zur Website.</em></h2><p>Sie bringen Ihr Wissen und Ihre Geschichte mit. Ich höre zu, sortiere, gestalte und setze um. So entsteht ein Auftritt, den Sie gerne zeigen.</p></div>
+      <div className="section-heading services-intro reveal"><h2>Von der ersten Idee<br/><em>bis zum fertigen Auftritt.</em></h2><p>Sie bringen Ihr Wissen, Ihre Geschichte und ein Ziel mit. Ich ordne, gestalte und setze um. So entsteht eine Website, die sich nach Ihnen anfühlt und für Ihre Kundinnen und Kunden klar funktioniert.</p></div>
       <div className="service-grid">
         {services.map((service, i) => <article key={service[0]} className={`service-card s${i+1} reveal`}>
           <div><h3>{service[0]}</h3><p>{service[1]}</p></div>
@@ -188,19 +187,21 @@ function App() {
 
     <section id="work" className="work shell">
       <div className="work-layout">
-        <div className="work-intro"><p className="eyebrow">Ausgewählte Arbeiten</p><h2>Websites für<br/><em>echte Aufgaben.</em></h2><p>Von der Praxis bis zum Verein: Diese Seiten wurden von mir entwickelt und werden bis heute betreut.</p></div>
+        <div className="work-intro"><h2>Websites für<br/><em>echte Aufgaben.</em></h2><p>Von der Praxis bis zum Verein: Diese Seiten wurden von mir entwickelt und werden bis heute betreut.</p></div>
         <div className="project-list">
           {featuredProjects.map((project, index) => <a className={`project-card featured-project project-${project.theme}`} href={project.url} target="_blank" rel="noreferrer" key={project.name} aria-label={`${project.name} besuchen`}>
-            <div className="project-image"><span className="project-number">0{index + 1}</span><div className="project-browser"><div className="project-browser-bar"><i/><i/><i/><small>{project.domain}</small></div><div className="project-browser-viewport"><img src={project.image} alt={`Website von ${project.name}`} loading="lazy" decoding="async"/></div></div></div>
+            <div className="project-image"><span className="project-number">0{index + 1}</span><div className="project-browser"><div className="project-browser-bar"><i/><i/><i/><small>{project.domain}</small></div><div className="project-browser-viewport"><img src={project.image} alt={`Website von ${project.name}`} loading="lazy" decoding="async"/></div></div><span className="project-visit" aria-hidden="true">Website besuchen <ArrowUpRight size={16}/></span></div>
             <div className="project-meta"><div><p>{project.category}</p><h3>{project.name}</h3></div><span>{project.domain}</span></div>
           </a>)}
           <div className="project-archive">
-            <div className="project-archive-heading"><p className="eyebrow">Weitere Arbeiten</p><p>Eine Auswahl aus Branding, Webdesign und digitalen Präsentationen.</p></div>
+            <div className="project-archive-heading"><p>Eine Auswahl aus Branding, Webdesign und digitalen Präsentationen.</p></div>
             <div className="project-archive-grid">
-              {additionalProjects.map((project) => <article className="project-archive-item" key={project[1]}>
-                <img src={project[2]} alt="" loading="lazy" decoding="async"/>
-                <div><p>{project[0]}</p><h3>{project[1]}</h3></div>
-              </article>)}
+              {additionalProjects.map((project) => {
+                const content = <><img src={project.image} alt={`Website von ${project.name}`} loading="lazy" decoding="async"/><div><p>{project.category}</p><h3>{project.name}</h3></div>{project.url && <span className="archive-visit" aria-hidden="true">Besuchen <ArrowUpRight size={13}/></span>}</>;
+                return project.url
+                  ? <a className="project-archive-item project-archive-link" href={project.url} target="_blank" rel="noreferrer" key={project.name} aria-label={`${project.name} besuchen`}>{content}</a>
+                  : <article className="project-archive-item" key={project.name}>{content}</article>;
+              })}
             </div>
           </div>
         </div>
@@ -209,7 +210,7 @@ function App() {
 
     <section className="about shell reveal">
       <div className="about-image"><img src="/assets/dorota-about-v2.png" alt="Dorota Wendler, Webdesignerin aus Karlsruhe" loading="lazy" decoding="async"/></div>
-      <div className="about-copy"><p className="eyebrow">Lernen wir uns kennen</p><h2>Hallo, ich bin Dorota.</h2><p>Ich bin freiberufliche Webdesignerin aus Karlsruhe. Ich höre gerne genau hin und entwickle Lösungen, die wirklich zu den Menschen dahinter passen.</p><p>Bei mir sprechen Sie immer direkt mit der Person, die Ihr Projekt gestaltet. Ich begleite Sie von den ersten Gedanken über Text und Design bis zur fertigen Website.</p><button className="button primary" onClick={openInquiry}>Projekt besprechen <ArrowDownRight size={17}/></button></div>
+      <div className="about-copy"><h2>Hallo, ich bin Dorota.</h2><p>Ich bin freiberufliche Webdesignerin aus Karlsruhe. Ich höre gerne genau hin und entwickle Lösungen, die wirklich zu den Menschen dahinter passen.</p><p>Bei mir sprechen Sie immer direkt mit der Person, die Ihr Projekt gestaltet. Ich begleite Sie von den ersten Gedanken über Text und Design bis zur fertigen Website.</p><button className="button primary" onClick={openInquiry}>Projekt besprechen <ArrowDownRight size={17}/></button></div>
     </section>
 
     <section id="contact" className="contact">
