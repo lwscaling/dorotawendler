@@ -177,7 +177,7 @@ function App() {
     </section>
 
     <section id="expertise" className="services shell">
-      <div className="section-heading services-intro reveal"><h2>Von der ersten Idee<br/><em>bis zum fertigen Auftritt.</em></h2><p>Sie bringen Ihr Wissen, Ihre Geschichte und ein Ziel mit. Ich ordne, gestalte und setze um. So entsteht eine Website, die sich nach Ihnen anfühlt und für Ihre Kundinnen und Kunden klar funktioniert.</p></div>
+      <div className="section-heading services-intro reveal"><h2>Von der ersten Idee <em>bis zum fertigen Auftritt.</em></h2><p>Sie bringen Ihr Wissen, Ihre Geschichte und ein Ziel mit. Ich ordne, gestalte und setze um. So entsteht eine Website, die sich nach Ihnen anfühlt und für Ihre Kundinnen und Kunden klar funktioniert.</p></div>
       <div className="service-grid">
         {services.map((service, i) => <article key={service[0]} className={`service-card s${i+1} reveal`}>
           <div><h3>{service[0]}</h3><p>{service[1]}</p></div>

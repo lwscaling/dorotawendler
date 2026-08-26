@@ -102,7 +102,7 @@
 
 /* Editorial section lead: one clear thought, with the explanation held as a calm counterpoint. */
 .services-intro{grid-template-columns:minmax(0,1.55fr) minmax(19rem,.62fr);gap:clamp(3rem,8vw,8rem);align-items:end;padding-top:2.25rem;border-top:1px solid var(--line)}
-.services-intro h2{max-width:13ch}.services-intro>p:last-child{position:relative;max-width:31rem;padding-left:1.6rem;font-size:1.08rem;line-height:1.7}.services-intro>p:last-child::before{content:"";position:absolute;left:0;top:.55rem;width:2px;height:3.2rem;border-radius:2px;background:var(--acid)}
+.services-intro h2{max-width:17ch}.services-intro>p:last-child{position:relative;max-width:31rem;padding-left:1.6rem;font-size:1.08rem;line-height:1.7}.services-intro>p:last-child::before{content:"";position:absolute;left:0;top:.55rem;width:2px;height:3.2rem;border-radius:2px;background:var(--acid)}
 
 /* Project links remain visually quiet until intent is shown by hover or keyboard focus. */
 .featured-project .project-image::after{content:"";position:absolute;inset:0;z-index:3;background:rgba(42,39,34,.16);backdrop-filter:blur(2.5px) grayscale(.45);opacity:0;transition:opacity .4s ease}
