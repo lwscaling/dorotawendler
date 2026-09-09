@@ -163,7 +163,7 @@ function App() {
           <span className="line"><span className="hero-word">Ihr Geschäft.</span></span>
           <span className="line serif"><span className="hero-word">Nur persönlicher.</span></span>
         </h1>
-        <p className="hero-lead">Ich entwickle digitale Auftritte die nach Ihnen aussehen. Klar gestaltet, eigenständig und mit viel Liebe zum Detail.</p>
+        <p className="hero-lead">Ich entwickle digitale Auftritte, die nach Ihnen aussehen. Klar gestaltet, eigenständig und mit viel Liebe zum Detail.</p>
         <div className="hero-actions"><button className="button primary" onClick={openInquiry}>Projekt besprechen <ArrowDownRight size={18}/></button><a className="button secondary" href="#work">Projekte ansehen</a></div>
       </div>
       <div className="hero-visual">
@@ -187,7 +187,7 @@ function App() {
 
     <section id="work" className="work shell">
       <div className="work-layout">
-        <div className="work-intro"><h2>Websites für<br/><em>echte Aufgaben.</em></h2><p>Von der Praxis bis zum Verein: Diese Seiten wurden von mir entwickelt und werden bis heute betreut.</p></div>
+        <div className="work-intro"><h2>Websites für<br/><em>echte Aufgaben.</em></h2><p>Von der Arztpraxis bis zum Verein: Diese Seiten habe ich entwickelt und betreue sie bis heute.</p></div>
         <div className="project-list">
           {featuredProjects.map((project, index) => <a className={`project-card featured-project project-${project.theme}`} href={project.url} target="_blank" rel="noreferrer" key={project.name} aria-label={`${project.name} besuchen`}>
             <div className="project-image"><span className="project-number">0{index + 1}</span><div className="project-browser"><div className="project-browser-bar"><i/><i/><i/><small>{project.domain}</small></div><div className="project-browser-viewport"><img src={project.image} alt={`Website von ${project.name}`} loading="lazy" decoding="async"/></div></div><span className="project-visit" aria-hidden="true">Website besuchen <ArrowUpRight size={16}/></span></div>
